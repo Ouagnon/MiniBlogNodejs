@@ -1,0 +1,15 @@
+
+/* Bouton de suppression personnalisé */
+.btn-danger {
+	background: linear-gradient(90deg, #ff4e50, #f9d423);
+	color: #fff;
+	border: none;
+	font-weight: bold;
+	box-shadow: 0 2px 8px rgba(255, 78, 80, 0.15);
+	transition: background 0.3s, transform 0.2s;
+}
+.btn-danger:hover, .btn-danger:focus {
+	background: linear-gradient(90deg, #f9d423, #ff4e50);
+	color: #fff;
+	transform: scale(1.05);
+}

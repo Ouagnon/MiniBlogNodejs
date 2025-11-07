@@ -1,0 +1,58 @@
+<%- include('header.ejs') %>
+<body class="bg-light">
+    <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
+        <div class="row w-100">
+            <div class="col-12 col-md-6 col-lg-4 mx-auto">
+                <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                    <strong>Erreur :</strong> <%= error %>
+                </div>
+                <% } %>
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-primary text-white text-center py-4">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-blog me-2"></i>Mini Blog
+                        </h1>
+                        <p class="mb-0 mt-2 opacity-75">Connexion à votre compte</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form action="/logination" method="POST">
+                            <div class="mb-3">
+                                <label for="username" class="form-label fw-bold">
+                                    <i class="fas fa-user me-2"></i>Nom d'utilisateur
+                                </label>
+                                <input type="text" id="username" name="username" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Entrez votre nom d'utilisateur" 
+                                       required autocomplete="username">
+                            </div>
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-bold">
+                                    <i class="fas fa-lock me-2"></i>Mot de passe
+                                </label>
+                                <input type="password" id="password" name="password" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="Entrez votre mot de passe" 
+                                       required autocomplete="current-password">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center bg-light py-3">
+                        <p class="mb-0 text-muted">
+                            Pas de compte ? 
+                            <a href="/creerCompte" class="text-decoration-none fw-bold">
+                                Créer un compte
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
