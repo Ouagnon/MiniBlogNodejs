@@ -30,8 +30,8 @@ connection.connect((err) => {
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-app.listen(3000, () => {
- console.log('Serveur lancé sur http://localhost:3000');
+app.listen(10009, () => {
+ console.log('Serveur lancé sur http://www2.sio-savary.fr:10009');
 });
 
 app.use(session({
@@ -91,18 +91,23 @@ app.get('/new', requireLogin, (req, res) => {
 
 app.post('/new', requireLogin, (req, res) => {
     const { title, content, category } = req.body;
-    let imageBuffer = null;
-    if (req.files && req.files.image) {
-        imageBuffer = req.files.image.data;
-    }
-    connection.query('INSERT INTO article (title, content, image) VALUES (?, ?, ?)', [title, content, imageBuffer], (err, result) => {
-        if (err) throw err;
-        const articleId = result.insertId;
-        connection.query('INSERT INTO article_categorie (id_article, id_categorie) VALUES (?, ?)', [articleId, category], (err2) => {
-            if (err2) throw err2;
-            res.redirect('/');
-        });
-    });
+    const imageBuffer = req.files?.image?.data || null;
+    connection.query(
+        'INSERT INTO article (title, content, image) VALUES (?, ?, ?)',
+        [title, content, imageBuffer],
+        (err, result) => {
+            if (err) throw err;
+            const articleId = result.insertId;
+            connection.query(
+                'INSERT INTO article_categorie (id_article, id_categorie) VALUES (?, ?)',
+                [articleId, category],
+                (err2) => {
+                    if (err2) throw err2;
+                    res.redirect('/');
+                }
+            );
+        }
+    );
 });
 
 app.get('/article/:id', requireLogin, (req, res) => {
@@ -137,17 +142,14 @@ app.get('/article/:id/image', (req, res) => {
     const articleID = req.params.id;
     connection.query('SELECT image FROM article WHERE id = ?', [articleID], (err, results) => {
         if (err) return res.status(500).send('Erreur serveur');
-        if (!results || results.length === 0 || !results[0].image) {
-            return res.status(404).send('Aucune image');
-        }
-            const img = results[0].image;
-            // Détection rapide du type MIME
-            let mime = 'image/jpeg';
-            if (img[0] === 0x89 && img[1] === 0x50 && img[2] === 0x4E && img[3] === 0x47) mime = 'image/png';
-            else if (img[0] === 0x47 && img[1] === 0x49 && img[2] === 0x46) mime = 'image/gif';
-            else if (img[0] === 0x52 && img[1] === 0x49 && img[2] === 0x46 && img[3] === 0x46) mime = 'image/webp';
-            res.set('Content-Type', mime);
-            res.send(img);
+        if (!results || results.length === 0 || !results[0].image) return res.status(404).send('Aucune image');
+        const img = results[0].image;
+        let mime = 'image/jpeg';
+        if (img[0] === 0x89) mime = 'image/png';
+        else if (img[0] === 0x47) mime = 'image/gif';
+        else if (img[0] === 0x52) mime = 'image/webp';
+        res.set('Content-Type', mime);
+        res.send(img);
     });
 });
 
@@ -249,4 +251,25 @@ app.get('/api/list', (req, res) => {
         }
         res.json(articles); 
     });
+});
+
+app.post('/api/new', (req, res) => {
+    const { title, content, category } = req.body;
+    const imageBuffer = req.files?.image?.data || null;
+    connection.query(
+        'INSERT INTO article (title, content, image) VALUES (?, ?, ?)',
+        [title, content, imageBuffer],
+        (err, result) => {
+            if (err) return res.status(500).json({ success: false, error: err.message });
+            const articleId = result.insertId;
+            connection.query(
+                'INSERT INTO article_categorie (id_article, id_categorie) VALUES (?, ?)',
+                [articleId, category],
+                (err2) => {
+                    if (err2) return res.status(500).json({ success: false, error: err2.message });
+                    res.json({ success: true, articleId });
+                }
+            );
+        }
+    );
 });
